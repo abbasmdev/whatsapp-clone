@@ -8,6 +8,17 @@ import {
 import styles from "./index.module.css";
 
 const Sidebar = () => {
+  const startANewChatClickHandler = () => {
+    const email = prompt("Enter email of the user you want to chat with");
+    if (
+      !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+        email
+      )
+    )
+      return;
+    console.log(email);
+  };
+
   return (
     <Container>
       <Header>
@@ -27,7 +38,9 @@ const Sidebar = () => {
           <SearchInput placeholder="Search in chats" />
         </SidebarSearch>
       </SearchContainer>
-      <StartNewChatButton>START A NEW CHAT</StartNewChatButton>
+      <StartNewChatButton onClick={startANewChatClickHandler}>
+        START A NEW CHAT
+      </StartNewChatButton>
     </Container>
   );
 };
