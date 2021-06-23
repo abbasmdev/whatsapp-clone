@@ -1,4 +1,5 @@
 import React from "react";
+import { useDispatch } from "react-redux";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { Avatar, IconButton, Menu, MenuItem } from "@material-ui/core";
 import styled from "styled-components";
@@ -10,8 +11,10 @@ import {
 import { firebaseAuth, firebaseDb } from "../../firebase/firebase";
 import styles from "./index.module.css";
 import ChatItem from "./ChatItem";
+import { setSelectedChatId } from "../../store/chat/chatSlice";
 
 const Sidebar = () => {
+  const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const currentUser = firebaseAuth.currentUser;
   const userChatsRef = firebaseDb
@@ -51,6 +54,10 @@ const Sidebar = () => {
     );
     console.log("found != null>>", found != null);
     return found != null;
+  };
+
+  const chatItemClickHandler = (id) => {
+    dispatch(setSelectedChatId(id));
   };
   return (
     <Container>
@@ -109,6 +116,7 @@ const Sidebar = () => {
       <ChatsListContainer>
         {userChatsSnapshot?.docs?.map((chat) => (
           <ChatItem
+            onClick={() => chatItemClickHandler(chat.id)}
             id={chat.id}
             key={chat.id}
             userEmail={

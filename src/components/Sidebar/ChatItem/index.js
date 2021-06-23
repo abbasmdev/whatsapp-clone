@@ -3,13 +3,13 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import { firebaseDb } from "../../../firebase/firebase";
 
-const ChatItem = ({ userEmail, id }) => {
+const ChatItem = ({ userEmail, id, onClick }) => {
   const [recipientUserSnapshot] = useCollection(
     firebaseDb.collection("users").where("email", "==", userEmail)
   );
   const recipientUser = recipientUserSnapshot?.docs?.[0]?.data();
   return (
-    <Container>
+    <Container onClick={onClick}>
       {recipientUser?.photoURL ? (
         <CustomAvatar src={recipientUser?.photoURL} />
       ) : (
