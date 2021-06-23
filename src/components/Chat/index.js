@@ -1,5 +1,6 @@
 import { useCollection, useDocument } from "react-firebase-hooks/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
+import firebase from "firebase";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { firebaseAuth, firebaseDb } from "../../firebase/firebase";
@@ -12,8 +13,12 @@ import {
   EmojiEmotionsOutlined as EmojiEmotionsOutlinedIcon,
   Send as SendIcon,
 } from "@material-ui/icons";
+import Message from "./Message";
+import { useRef, useState } from "react";
 
 const Chat = () => {
+  const lastElemetOfChatRef = useRef();
+  const [messageText, setMessageText] = useState("");
   const [currentUser] = useAuthState(firebaseAuth);
   const selectedChatId = useSelector(selectSelectedChatId);
   const [chatSnapshot] = useDocument(firebaseDb.doc(`chats/${selectedChatId}`));
@@ -27,7 +32,23 @@ const Chat = () => {
   const chatData = chatSnapshot?.data();
   const recipientEmail = chatData?.users.find((u) => u !== currentUser?.email);
 
-  console.log(recipientEmail);
+  const messageSubmitHandler = (event) => {
+    event.preventDefault();
+    const trimedMessage = messageText.trim();
+    if (trimedMessage.length === 0) return;
+    firebaseDb
+      .collection("chats")
+      .doc(selectedChatId)
+      .collection("messages")
+      .add({
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        message: messageText,
+        user: currentUser.email,
+        photoURL: currentUser.photoURL,
+      });
+    lastElemetOfChatRef.current.scrollIntoView({ behavior: "smooth" });
+    setMessageText("");
+  };
 
   return (
     <Container>
@@ -47,9 +68,12 @@ const Chat = () => {
       </Header>
       <Body>
         <MessagesList>
-          <EndOfMessagesList />
+          {messagesSnapshot?.docs?.map((doc) => (
+            <Message key={doc.id} data={doc.data()} user={doc.data().user} />
+          ))}
+          <EndOfMessagesList ref={lastElemetOfChatRef} />
         </MessagesList>
-        <BottomContainer>
+        <BottomContainer onSubmit={messageSubmitHandler}>
           <LeftActionsList>
             <IconButton>
               <EmojiEmotionsOutlinedIcon />
@@ -59,9 +83,12 @@ const Chat = () => {
             </IconButton>
           </LeftActionsList>
           <MessageInputContainer>
-            <MessageInput placeholder="Type a message" />
+            <MessageInput
+              placeholder="Type a message"
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+            />
           </MessageInputContainer>
-
           <RightActionsList>
             <IconButton>
               <SendIcon />
@@ -118,7 +145,7 @@ const MessagesList = styled.div`
 
 const EndOfMessagesList = styled.div``;
 
-const BottomContainer = styled.div`
+const BottomContainer = styled.form`
   width: 100%;
   padding: 10px;
   background-color: #ededed;

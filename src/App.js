@@ -10,11 +10,11 @@ function App() {
   const [user, loading, error] = useAuthState(firebaseAuth);
   const history = useHistory();
   useEffect(() => {
+    if (!user && loading) return;
     if ((!user && !loading) || (!loading && error)) {
       history.replace("/auth");
+      return;
     }
-    if (!user && loading) return;
-
     console.log(user);
     firebaseDb.collection("users").doc(user.uid).set(
       {
@@ -29,7 +29,7 @@ function App() {
   return (
     <div className={styles.app}>
       {loading ? (
-        <p>Loading</p>
+        <p>Loading...</p>
       ) : (
         <Switch>
           <Route path="/" exact>
