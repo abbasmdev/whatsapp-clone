@@ -1,4 +1,4 @@
-import { Avatar, IconButton } from "@material-ui/core";
+import { Avatar, IconButton, Menu, MenuItem } from "@material-ui/core";
 import styled from "styled-components";
 import {
   Chat as ChatIcon,
@@ -6,8 +6,20 @@ import {
   Search as SearchIcon,
 } from "@material-ui/icons";
 import styles from "./index.module.css";
+import React from "react";
+import { firebaseAuth } from "../../firebase/firebase";
 
 const Sidebar = () => {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const startANewChatClickHandler = () => {
     const email = prompt("Enter email of the user you want to chat with");
     if (
@@ -19,6 +31,10 @@ const Sidebar = () => {
     console.log(email);
   };
 
+  const logoutClickHandler = () => {
+    firebaseAuth.signOut();
+  };
+
   return (
     <Container>
       <Header>
@@ -28,7 +44,38 @@ const Sidebar = () => {
             <ChatIcon />
           </IconButton>
           <IconButton>
-            <MoreVertIcon />
+            <MoreVertIcon
+              aria-controls="simple-menu"
+              aria-haspopup="true"
+              onClick={handleClick}
+            />
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem disabled={true} onClick={handleClose}>
+                New group
+              </MenuItem>
+              <MenuItem disabled={true} onClick={handleClose}>
+                Create a room
+              </MenuItem>
+              <MenuItem disabled={true} onClick={handleClose}>
+                Profile
+              </MenuItem>
+              <MenuItem disabled={true} onClick={handleClose}>
+                Archived
+              </MenuItem>
+              <MenuItem disabled={true} onClick={handleClose}>
+                Starred
+              </MenuItem>
+              <MenuItem disabled={true} onClick={handleClose}>
+                Settings
+              </MenuItem>
+              <MenuItem onClick={logoutClickHandler}>Log out</MenuItem>
+            </Menu>
           </IconButton>
         </IconsContainer>
       </Header>
