@@ -17,6 +17,6 @@ export const chatSlice = createSlice({
 
 export const { setSelectedChatId } = chatSlice.actions;
 
-export const selectSelectedChatId = (state) => state.counter.selectedChatId;
+export const selectSelectedChatId = (state) => state.chat.selectedChatId;
 
 export default chatSlice.reducer;
