@@ -7,6 +7,8 @@ import AuthPage from "./pages/Auth";
 import styles from "./App.module.css";
 
 function App() {
+  const [user, loading, error] = useAuthState(firebaseAuth);
+  const history = useHistory();
   firebaseAuth.onAuthStateChanged((user) => {
     if (user) {
       firebaseDb.collection("users").doc(user.uid).set(
@@ -21,8 +23,6 @@ function App() {
       history.replace("/auth");
     }
   });
-  const [user, loading, error] = useAuthState(firebaseAuth);
-  const history = useHistory();
 
   return (
     <div className={styles.app}>

@@ -32,6 +32,11 @@ const Chat = () => {
   const chatData = chatSnapshot?.data();
   const recipientEmail = chatData?.users.find((u) => u !== currentUser?.email);
 
+  messagesSnapshot?.docChanges()?.forEach((change) => {
+    if (change.type === "added") {
+      lastElemetOfChatRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  });
   const messageSubmitHandler = (event) => {
     event.preventDefault();
     const trimedMessage = messageText.trim();
@@ -46,7 +51,7 @@ const Chat = () => {
         user: currentUser.email,
         photoURL: currentUser.photoURL,
       });
-    lastElemetOfChatRef.current.scrollIntoView({ behavior: "smooth" });
+    // lastElemetOfChatRef.current.scrollIntoView({ behavior: "smooth" });
     setMessageText("");
   };
 
