@@ -1,3 +1,5 @@
+import React from "react";
+import { useCollection } from "react-firebase-hooks/firestore";
 import { Avatar, IconButton, Menu, MenuItem } from "@material-ui/core";
 import styled from "styled-components";
 import {
@@ -5,13 +7,18 @@ import {
   MoreVert as MoreVertIcon,
   Search as SearchIcon,
 } from "@material-ui/icons";
+import { firebaseAuth, firebaseDb } from "../../firebase/firebase";
 import styles from "./index.module.css";
-import React from "react";
-import { firebaseAuth } from "../../firebase/firebase";
+import ChatItem from "./ChatItem";
 
 const Sidebar = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const currentUser = firebaseAuth.currentUser;
+  const userChatsRef = firebaseDb
+    .collection("chats")
+    .where("users", "array-contains", currentUser.email);
 
+  const [userChatsSnapshot] = useCollection(userChatsRef);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -20,7 +27,7 @@ const Sidebar = () => {
     setAnchorEl(null);
   };
 
-  const startANewChatClickHandler = () => {
+  const startANewChatClickHandler = async () => {
     const email = prompt("Enter email of the user you want to chat with");
     if (
       !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
@@ -28,13 +35,23 @@ const Sidebar = () => {
       )
     )
       return;
-    console.log(email);
+    if (email === currentUser.email || isChatExists(email)) {
+      alert("Chat already exists.");
+      return;
+    }
+    firebaseDb.collection("chats").add({ users: [currentUser.email, email] });
   };
 
   const logoutClickHandler = () => {
     firebaseAuth.signOut();
   };
-
+  const isChatExists = (recipientEmail) => {
+    const found = userChatsSnapshot?.docs.find((chat) =>
+      chat.data().users.find((userEmail) => recipientEmail === userEmail)
+    );
+    console.log("found != null>>", found != null);
+    return found != null;
+  };
   return (
     <Container>
       <Header>
@@ -88,6 +105,18 @@ const Sidebar = () => {
       <StartNewChatButton onClick={startANewChatClickHandler}>
         START A NEW CHAT
       </StartNewChatButton>
+
+      <ChatsListContainer>
+        {userChatsSnapshot?.docs?.map((chat) => (
+          <ChatItem
+            id={chat.id}
+            key={chat.id}
+            userEmail={
+              chat.data().users.filter((e) => e !== currentUser.email)[0]
+            }
+          />
+        ))}
+      </ChatsListContainer>
     </Container>
   );
 };
@@ -114,6 +143,7 @@ const SidebarAvatar = styled(Avatar)`
   }
 `;
 
+const ChatsListContainer = styled.div``;
 const IconsContainer = styled.div``;
 const SearchContainer = styled.div`
   background-color: #f6f6f6;
