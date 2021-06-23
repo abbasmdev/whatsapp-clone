@@ -131,7 +131,10 @@ const Sidebar = () => {
 
 export default Sidebar;
 
-const Container = styled.div``;
+const Container = styled.div`
+  height: 100%;
+  background-color: white;
+`;
 const Header = styled.div`
   display: flex;
   align-items: center;
